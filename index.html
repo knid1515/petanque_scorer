@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมบันทึกคะแนนเปตอง</title>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .match-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .match-info div {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .score-table th, .score-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .score-table th {
+            background-color: #f2f2f2;
+        }
+        .score-table input {
+            width: 50px;
+            text-align: center;
+            border: none;
+        }
+        .results {
+            border-top: 2px solid #333;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        .results h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-summary {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .team-name-input {
+            font-weight: bold;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+        }
+        button.clear {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ใบลงคะแนนเปตอง</h1>
+
+    <div class="match-info">
+        <div>
+            <label for="type">ประเภท</label>
+            <input type="text" id="type" placeholder="เช่น ชายคู่">
+        </div>
+        <div>
+            <label for="round">รอบ</label>
+            <input type="text" id="round" placeholder="เช่น 1">
+        </div>
+        <div>
+            <label for="pool">สาย</label>
+            <input type="text" id="pool" placeholder="เช่น A">
+        </div>
+        <div>
+            <label for="match-no">คู่ที่</label>
+            <input type="text" id="match-no" placeholder="เช่น 1">
+        </div>
+    </div>
+
+    <table class="score-table">
+        <thead>
+            <tr>
+                <th>ทีม</th>
+                <script>for(let i=1; i<=13; i++) document.write(`<th>${i}</th>`);</script>
+                <th>รวม</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" id="teamAName" class="team-name-input" value="ทีม A"></td>
+                <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreA" min="0"></td>`);</script>
+                <td id="totalA">0</td>
+            </tr>
+            <tr>
+                <td><input type="text" id="teamBName" class="team-name-input" value="ทีม B"></td>
+                <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreB" min="0"></td>`);</script>
+                <td id="totalB">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="buttons">
+        <button onclick="calculateScores()">คำนวณผล</button>
+        <button class="clear" onclick="resetForm()">ล้างข้อมูล</button>
+    </div>
+
+    <div class="results">
+        <h2>ผลการแข่งขัน</h2>
+        <div class="result-summary">
+            <span id="winnerTeam">ทีม...</span>
+            <span>ชนะ</span>
+            <span id="loserTeam">ทีม...</span>
+            <span>ด้วยคะแนน</span>
+            <span id="scoreResult">0 ต่อ 0</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ฟังก์ชันสำหรับคำนวณคะแนน
+    function calculateScores() {
+        // คำนวณคะแนนรวมของทีม A
+        let scoresA = document.querySelectorAll('.scoreA');
+        let totalA = 0;
+        scoresA.forEach(score => {
+            totalA += parseInt(score.value) || 0;
+        });
+        document.getElementById('totalA').innerText = totalA;
+
+        // คำนวณคะแนนรวมของทีม B
+        let scoresB = document.querySelectorAll('.scoreB');
+        let totalB = 0;
+        scoresB.forEach(score => {
+            totalB += parseInt(score.value) || 0;
+        });
+        document.getElementById('totalB').innerText = totalB;
+        
+        // สรุปผลการแข่งขัน
+        updateResult(totalA, totalB);
+    }
+
+    // ฟังก์ชันสำหรับอัปเดตผลการแข่งขัน
+    function updateResult(scoreA, scoreB) {
+        const teamAName = document.getElementById('teamAName').value || 'ทีม A';
+        const teamBName = document.getElementById('teamBName').value || 'ทีม B';
+        
+        let winner, loser, winnerScore, loserScore;
+
+        if (scoreA > scoreB) {
+            winner = teamAName;
+            loser = teamBName;
+            winnerScore = scoreA;
+            loserScore = scoreB;
+        } else if (scoreB > scoreA) {
+            winner = teamBName;
+            loser = teamAName;
+            winnerScore = scoreB;
+            loserScore = scoreA;
+        } else {
+            // กรณีเสมอ
+            document.getElementById('winnerTeam').innerText = 'ผลเสมอ';
+            document.getElementById('loserTeam').innerText = '';
+            document.getElementById('scoreResult').innerText = `${scoreA} ต่อ ${scoreB}`;
+            return;
+        }
+
+        document.getElementById('winnerTeam').innerText = winner;
+        document.getElementById('loserTeam').innerText = loser;
+        document.getElementById('scoreResult').innerText = `${winnerScore} ต่อ ${loserScore}`;
+    }
+    
+    // ฟังก์ชันสำหรับรีเซ็ตฟอร์ม
+    function resetForm() {
+        document.getElementById('type').value = '';
+        document.getElementById('round').value = '';
+        document.getElementById('pool').value = '';
+        document.getElementById('match-no').value = '';
+        document.getElementById('teamAName').value = 'ทีม A';
+        document.getElementById('teamBName').value = 'ทีม B';
+
+        let allScores = document.querySelectorAll('.scoreA, .scoreB');
+        allScores.forEach(score => score.value = '');
+
+        document.getElementById('totalA').innerText = '0';
+        document.getElementById('totalB').innerText = '0';
+
+        document.getElementById('winnerTeam').innerText = 'ทีม...';
+        document.getElementById('loserTeam').innerText = 'ทีม...';
+        document.getElementById('scoreResult').innerText = '0 ต่อ 0';
+    }
+</script>
+
+</body>
+</html>
