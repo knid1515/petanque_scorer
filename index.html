@@ -13,6 +13,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .container {
             background-color: white;
@@ -20,7 +21,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 800px;
+            max-width: 900px; /* เพิ่มความกว้างสูงสุดเล็กน้อย */
         }
         h1 {
             text-align: center;
@@ -52,19 +53,34 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            table-layout: fixed; /* ทำให้ตารางกระจายความกว้างเท่าๆ กัน */
         }
         .score-table th, .score-table td {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 8px 2px; /* <-- ปรับแก้: ลด padding ซ้าย-ขวา */
             text-align: center;
+            font-size: 14px; /* <-- ปรับแก้: ลดขนาดตัวอักษรเล็กน้อย */
         }
         .score-table th {
             background-color: #f2f2f2;
         }
+        /* กำหนดความกว้างคอลัมน์แรก (ทีม) ให้กว้างกว่าคอลัมน์อื่น */
+        .score-table th:first-child,
+        .score-table td:first-child {
+            width: 18%; 
+        }
+         /* กำหนดความกว้างคอลัมน์สุดท้าย (รวม) */
+        .score-table th:last-child,
+        .score-table td:last-child {
+            width: 8%;
+            font-weight: bold;
+        }
         .score-table input {
-            width: 50px;
+            width: 100%; /* ทำให้ input กว้างเต็มเซลล์ */
             text-align: center;
             border: none;
+            background-color: transparent;
+            box-sizing: border-box; /* คำนวณ padding และ border ใน width */
         }
         .results {
             border-top: 2px solid #333;
@@ -81,6 +97,7 @@
             align-items: center;
             font-size: 1.2em;
             font-weight: bold;
+            flex-wrap: wrap; /* ทำให้ปรับขนาดตามหน้าจอได้ */
         }
         .team-name-input {
             font-weight: bold;
@@ -169,9 +186,7 @@
 </div>
 
 <script>
-    // ฟังก์ชันสำหรับคำนวณคะแนน
     function calculateScores() {
-        // คำนวณคะแนนรวมของทีม A
         let scoresA = document.querySelectorAll('.scoreA');
         let totalA = 0;
         scoresA.forEach(score => {
@@ -179,7 +194,6 @@
         });
         document.getElementById('totalA').innerText = totalA;
 
-        // คำนวณคะแนนรวมของทีม B
         let scoresB = document.querySelectorAll('.scoreB');
         let totalB = 0;
         scoresB.forEach(score => {
@@ -187,11 +201,9 @@
         });
         document.getElementById('totalB').innerText = totalB;
         
-        // สรุปผลการแข่งขัน
         updateResult(totalA, totalB);
     }
 
-    // ฟังก์ชันสำหรับอัปเดตผลการแข่งขัน
     function updateResult(scoreA, scoreB) {
         const teamAName = document.getElementById('teamAName').value || 'ทีม A';
         const teamBName = document.getElementById('teamBName').value || 'ทีม B';
@@ -209,7 +221,6 @@
             winnerScore = scoreB;
             loserScore = scoreA;
         } else {
-            // กรณีเสมอ
             document.getElementById('winnerTeam').innerText = 'ผลเสมอ';
             document.getElementById('loserTeam').innerText = '';
             document.getElementById('scoreResult').innerText = `${scoreA} ต่อ ${scoreB}`;
@@ -221,7 +232,6 @@
         document.getElementById('scoreResult').innerText = `${winnerScore} ต่อ ${loserScore}`;
     }
     
-    // ฟังก์ชันสำหรับรีเซ็ตฟอร์ม
     function resetForm() {
         document.getElementById('type').value = '';
         document.getElementById('round').value = '';
