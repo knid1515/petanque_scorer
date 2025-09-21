@@ -40,13 +40,23 @@
             font-weight: bold;
             color: #555;
         }
+
+        /* ---ปรับแก้ตรงนี้--- สไตล์หลักของ Input ทุกช่อง */
         input[type="text"], input[type="number"] {
-            padding: 8px;
-            border: 1px solid #ccc;
+            background-color: #f0f0f0; /* พื้นหลังสีเทาอ่อน */
+            border: 1px solid #ccc;    /* เส้นขอบสีเทา */
             border-radius: 4px;
+            padding: 8px;
             width: 100%;
             box-sizing: border-box;
         }
+        /* ---ปรับแก้ตรงนี้--- ทำให้ input มีเงาเล็กน้อยเมื่อถูกเลือก */
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0,123,255,0.5);
+        }
+
         .score-table {
             width: 100%;
             border-collapse: collapse;
@@ -62,12 +72,10 @@
         .score-table th { background-color: #f2f2f2; }
         .score-table th:first-child, .score-table td:first-child { width: 18%; }
         .score-table th:last-child, .score-table td:last-child { width: 8%; font-weight: bold; }
+        
         .score-table input {
-            width: 100%;
             text-align: center;
-            border: none;
-            background-color: transparent;
-            box-sizing: border-box;
+            /* ไม่ต้องกำหนด border หรือ background ที่นี่แล้ว เพราะจะใช้สไตล์หลักแทน */
         }
         .results {
             border-top: 2px solid #333;
@@ -111,13 +119,10 @@
         }
         .referees div { text-align: center; }
         .referees input {
-             border: none;
-             border-bottom: 1px solid #ccc;
-             border-radius: 0;
              text-align: center;
+             /* ไม่ต้องกำหนด border หรือ background ที่นี่แล้ว */
         }
         
-        /* --- ส่วน Footer --- */
         footer {
             text-align: center;
             margin-top: 40px;
@@ -126,7 +131,7 @@
             color: #777;
         }
 
-        /* --- CSS สำหรับมือถือ --- */
+        /* --- CSS สำหรับมือถือ (ไม่มีการเปลี่ยนแปลง) --- */
         @media (max-width: 768px) {
             .score-table thead { display: none; }
             .score-table, .score-table tbody, .score-table tr, .score-table td {
@@ -226,15 +231,15 @@
 
         <div class="referees">
              <div>
-                <input type="text" id="ref1" placeholder="........................................................">
+                <input type="text" id="ref1" placeholder="ชื่อกรรมการ">
                 <label for="ref1">กรรมการ</label>
              </div>
              <div>
-                <input type="text" id="ref2" placeholder="........................................................">
+                <input type="text" id="ref2" placeholder="ชื่อกรรมการ">
                 <label for="ref2">กรรมการ</label>
              </div>
              <div>
-                <input type="text" id="ref3" placeholder="........................................................">
+                <input type="text" id="ref3" placeholder="ชื่อกรรมการ">
                 <label for="ref3">กรรมการ</label>
              </div>
         </div>
@@ -253,26 +258,22 @@
 </div>
 
 <script>
-    // ฟังก์ชัน JavaScript ทั้งหมดเหมือนเดิม
+    // JavaScript ไม่มีการเปลี่ยนแปลง
     function calculateScores() {
         let scoresA = document.querySelectorAll('.scoreA');
         let totalA = 0;
         scoresA.forEach(score => { totalA += parseInt(score.value) || 0; });
         document.getElementById('totalA').innerText = totalA;
-
         let scoresB = document.querySelectorAll('.scoreB');
         let totalB = 0;
         scoresB.forEach(score => { totalB += parseInt(score.value) || 0; });
         document.getElementById('totalB').innerText = totalB;
-        
         updateResult(totalA, totalB);
     }
-
     function updateResult(scoreA, scoreB) {
         const teamAName = document.getElementById('teamAName').value || 'ทีม A';
         const teamBName = document.getElementById('teamBName').value || 'ทีม B';
         let winner, loser, winnerScore, loserScore;
-
         if (scoreA > scoreB) {
             [winner, loser, winnerScore, loserScore] = [teamAName, teamBName, scoreA, scoreB];
         } else if (scoreB > scoreA) {
@@ -283,12 +284,10 @@
             document.getElementById('scoreResult').innerText = `${scoreA} ต่อ ${scoreB}`;
             return;
         }
-
         document.getElementById('winnerTeam').innerText = winner;
         document.getElementById('loserTeam').innerText = loser;
         document.getElementById('scoreResult').innerText = `${winnerScore} ต่อ ${loserScore}`;
     }
-    
     function resetForm() {
         document.querySelectorAll('#captureArea input[type="text"], #captureArea input[type="number"]').forEach(input => input.value = '');
         document.querySelectorAll('.scoreA, .scoreB').forEach(score => score.value = '');
@@ -298,27 +297,33 @@
         document.getElementById('loserTeam').innerText = 'ทีม...';
         document.getElementById('scoreResult').innerText = '0 ต่อ 0';
     }
-
     function saveAsJpg() {
         const captureElement = document.getElementById('captureArea');
         const competitionType = document.getElementById('type').value.replace(/\s/g, '') || 'ทั่วไป';
         const matchNo = document.getElementById('match-no').value || '0';
         const fileName = `ผลเปตอง-${competitionType}-คู่ที่-${matchNo}.jpg`;
-
-        let inputs = captureElement.querySelectorAll('input');
-        inputs.forEach(input => input.style.border = 'none');
-
-
+        // เปลี่ยน placeholder ชั่วคราวเพื่อให้สวยงามตอนบันทึก
+        const refereeInputs = captureElement.querySelectorAll('.referees input');
+        refereeInputs.forEach(input => input.placeholder = '.........................................');
         html2canvas(captureElement, {
-            scale: 2 
+            scale: 2,
+            onclone: (document) => {
+                // ทำให้ค่าใน input แสดงในภาพที่บันทึก
+                Array.from(document.querySelectorAll('input')).forEach(input => {
+                    input.style.setProperty('font-size', window.getComputedStyle(input).getPropertyValue('font-size'), 'important');
+                    if(input.value) {
+                       input.setAttribute('value', input.value);
+                    }
+                });
+            }
         }).then(canvas => {
-            inputs.forEach(input => input.style.border = '');
-
             const image = canvas.toDataURL("image/jpeg", 0.9);
             const link = document.createElement('a');
             link.href = image;
             link.download = fileName;
             link.click();
+            // คืนค่า placeholder เดิม
+            refereeInputs.forEach(input => input.placeholder = 'ชื่อกรรมการ');
         });
     }
 </script>
