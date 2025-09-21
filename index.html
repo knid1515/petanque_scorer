@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรแกรมบันทึกคะแนนเปตอง</title>
+    <title>โปรแกรมบันทึกคะแนนและตารางแข่งขันเปตอง</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Sarabun', sans-serif;
@@ -21,9 +22,9 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 900px; /* เพิ่มความกว้างสูงสุดเล็กน้อย */
+            max-width: 900px;
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #333;
         }
@@ -53,43 +54,35 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            table-layout: fixed; /* ทำให้ตารางกระจายความกว้างเท่าๆ กัน */
+            table-layout: fixed;
         }
         .score-table th, .score-table td {
             border: 1px solid #ddd;
-            padding: 8px 2px; /* <-- ปรับแก้: ลด padding ซ้าย-ขวา */
+            padding: 8px 2px;
             text-align: center;
-            font-size: 14px; /* <-- ปรับแก้: ลดขนาดตัวอักษรเล็กน้อย */
+            font-size: 14px;
         }
         .score-table th {
             background-color: #f2f2f2;
         }
-        /* กำหนดความกว้างคอลัมน์แรก (ทีม) ให้กว้างกว่าคอลัมน์อื่น */
-        .score-table th:first-child,
-        .score-table td:first-child {
-            width: 18%; 
+        .score-table th:first-child, .score-table td:first-child {
+            width: 18%;
         }
-         /* กำหนดความกว้างคอลัมน์สุดท้าย (รวม) */
-        .score-table th:last-child,
-        .score-table td:last-child {
+        .score-table th:last-child, .score-table td:last-child {
             width: 8%;
             font-weight: bold;
         }
         .score-table input {
-            width: 100%; /* ทำให้ input กว้างเต็มเซลล์ */
+            width: 100%;
             text-align: center;
             border: none;
             background-color: transparent;
-            box-sizing: border-box; /* คำนวณ padding และ border ใน width */
+            box-sizing: border-box;
         }
         .results {
             border-top: 2px solid #333;
             padding-top: 20px;
             margin-top: 20px;
-        }
-        .results h2 {
-            text-align: center;
-            margin-bottom: 20px;
         }
         .result-summary {
             display: flex;
@@ -97,7 +90,9 @@
             align-items: center;
             font-size: 1.2em;
             font-weight: bold;
-            flex-wrap: wrap; /* ทำให้ปรับขนาดตามหน้าจอได้ */
+            flex-wrap: wrap;
+            padding: 20px; /* เพิ่ม padding เพื่อให้ภาพสวยงาม */
+            background-color: #fff; /* ตั้งพื้นหลังให้เป็นสีขาว */
         }
         .team-name-input {
             font-weight: bold;
@@ -114,10 +109,35 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            margin: 0 10px;
+            margin: 5px 10px;
         }
-        button.clear {
-            background-color: #f44336;
+        button.clear { background-color: #f44336; }
+        button.save { background-color: #008CBA; } /* สีปุ่มบันทึก */
+        
+        /* ส่วนตารางการแข่งขัน */
+        .schedule {
+            margin-top: 40px;
+            border-top: 2px solid #333;
+            padding-top: 20px;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .schedule-table th {
+            background-color: #f2f2f2;
+        }
+        .schedule-table input {
+            width: 100%;
+            border: 1px solid #eee;
+            padding: 5px;
+            box-sizing: border-box;
+            text-align: center;
         }
     </style>
 </head>
@@ -127,22 +147,10 @@
     <h1>ใบลงคะแนนเปตอง</h1>
 
     <div class="match-info">
-        <div>
-            <label for="type">ประเภท</label>
-            <input type="text" id="type" placeholder="เช่น ชายคู่">
-        </div>
-        <div>
-            <label for="round">รอบ</label>
-            <input type="text" id="round" placeholder="เช่น 1">
-        </div>
-        <div>
-            <label for="pool">สาย</label>
-            <input type="text" id="pool" placeholder="เช่น A">
-        </div>
-        <div>
-            <label for="match-no">คู่ที่</label>
-            <input type="text" id="match-no" placeholder="เช่น 1">
-        </div>
+        <div><label for="type">ประเภท</label><input type="text" id="type" placeholder="เช่น ชายคู่"></div>
+        <div><label for="round">รอบ</label><input type="text" id="round" placeholder="เช่น 1"></div>
+        <div><label for="pool">สาย</label><input type="text" id="pool" placeholder="เช่น A"></div>
+        <div><label for="match-no">คู่ที่</label><input type="text" id="match-no" placeholder="เช่น 1"></div>
     </div>
 
     <table class="score-table">
@@ -170,35 +178,65 @@
     <div class="buttons">
         <button onclick="calculateScores()">คำนวณผล</button>
         <button class="clear" onclick="resetForm()">ล้างข้อมูล</button>
+        <button class="save" onclick="saveAsJpg()">บันทึกเป็น JPG</button>
     </div>
 
-    <div class="results">
-        <h2>ผลการแข่งขัน</h2>
-        <div class="result-summary">
-            <span id="winnerTeam">ทีม...</span>
-            <span>ชนะ</span>
-            <span id="loserTeam">ทีม...</span>
-            <span>ด้วยคะแนน</span>
-            <span id="scoreResult">0 ต่อ 0</span>
+    <div id="captureArea">
+        <div class="results">
+            <h2>ผลการแข่งขัน</h2>
+            <div class="result-summary">
+                <span id="winnerTeam">ทีม...</span>
+                <span>ชนะ</span>
+                <span id="loserTeam">ทีม...</span>
+                <span>ด้วยคะแนน</span>
+                <span id="scoreResult">0 ต่อ 0</span>
+            </div>
         </div>
+    </div>
+
+    <div class="schedule">
+        <h2>ตารางการแข่งขัน</h2>
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>รอบที่</th>
+                    <th>เวลา</th>
+                    <th>ทีม A</th>
+                    <th>ทีม B</th>
+                    <th>สนาม</th>
+                </tr>
+            </thead>
+            <tbody>
+                <script>
+                    for(let i = 0; i < 5; i++) {
+                        document.write(`
+                            <tr>
+                                <td><input type="text"></td>
+                                <td><input type="text"></td>
+                                <td><input type="text"></td>
+                                <td><input type="text"></td>
+                                <td><input type="text"></td>
+                            </tr>
+                        `);
+                    }
+                </script>
+            </tbody>
+        </table>
     </div>
 
 </div>
 
 <script>
+    // ฟังก์ชันคำนวณและรีเซ็ตเหมือนเดิม
     function calculateScores() {
         let scoresA = document.querySelectorAll('.scoreA');
         let totalA = 0;
-        scoresA.forEach(score => {
-            totalA += parseInt(score.value) || 0;
-        });
+        scoresA.forEach(score => { totalA += parseInt(score.value) || 0; });
         document.getElementById('totalA').innerText = totalA;
 
         let scoresB = document.querySelectorAll('.scoreB');
         let totalB = 0;
-        scoresB.forEach(score => {
-            totalB += parseInt(score.value) || 0;
-        });
+        scoresB.forEach(score => { totalB += parseInt(score.value) || 0; });
         document.getElementById('totalB').innerText = totalB;
         
         updateResult(totalA, totalB);
@@ -207,19 +245,12 @@
     function updateResult(scoreA, scoreB) {
         const teamAName = document.getElementById('teamAName').value || 'ทีม A';
         const teamBName = document.getElementById('teamBName').value || 'ทีม B';
-        
         let winner, loser, winnerScore, loserScore;
 
         if (scoreA > scoreB) {
-            winner = teamAName;
-            loser = teamBName;
-            winnerScore = scoreA;
-            loserScore = scoreB;
+            [winner, loser, winnerScore, loserScore] = [teamAName, teamBName, scoreA, scoreB];
         } else if (scoreB > scoreA) {
-            winner = teamBName;
-            loser = teamAName;
-            winnerScore = scoreB;
-            loserScore = scoreA;
+            [winner, loser, winnerScore, loserScore] = [teamBName, teamAName, scoreB, scoreA];
         } else {
             document.getElementById('winnerTeam').innerText = 'ผลเสมอ';
             document.getElementById('loserTeam').innerText = '';
@@ -233,22 +264,33 @@
     }
     
     function resetForm() {
-        document.getElementById('type').value = '';
-        document.getElementById('round').value = '';
-        document.getElementById('pool').value = '';
-        document.getElementById('match-no').value = '';
+        document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
         document.getElementById('teamAName').value = 'ทีม A';
         document.getElementById('teamBName').value = 'ทีม B';
-
-        let allScores = document.querySelectorAll('.scoreA, .scoreB');
-        allScores.forEach(score => score.value = '');
-
+        document.querySelectorAll('.scoreA, .scoreB').forEach(score => score.value = '');
         document.getElementById('totalA').innerText = '0';
         document.getElementById('totalB').innerText = '0';
-
         document.getElementById('winnerTeam').innerText = 'ทีม...';
         document.getElementById('loserTeam').innerText = 'ทีม...';
         document.getElementById('scoreResult').innerText = '0 ต่อ 0';
+    }
+
+    // ฟังก์ชันใหม่สำหรับบันทึกเป็น JPG
+    function saveAsJpg() {
+        const captureElement = document.getElementById('captureArea');
+        const teamAName = document.getElementById('teamAName').value || 'TeamA';
+        const teamBName = document.getElementById('teamBName').value || 'TeamB';
+        const fileName = `ผลการแข่งขัน-${teamAName}-vs-${teamBName}.jpg`;
+
+        html2canvas(captureElement, {
+            scale: 2 // เพิ่มความละเอียดของภาพเป็น 2 เท่า
+        }).then(canvas => {
+            const image = canvas.toDataURL("image/jpeg", 0.9); // แปลงเป็น JPG ที่คุณภาพ 90%
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = fileName;
+            link.click();
+        });
     }
 </script>
 
