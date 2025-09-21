@@ -11,10 +11,7 @@
             background-color: #f4f4f4;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            padding: 20px 0;
         }
         .container {
             background-color: white;
@@ -27,6 +24,10 @@
         h1, h2 {
             text-align: center;
             color: #333;
+        }
+        #captureArea {
+             background-color: #fff; /* ใส่พื้นหลังสีขาวเพื่อให้ภาพสมบูรณ์ */
+             padding: 20px;
         }
         .match-info {
             display: grid;
@@ -91,8 +92,7 @@
             font-size: 1.2em;
             font-weight: bold;
             flex-wrap: wrap;
-            padding: 20px; /* เพิ่ม padding เพื่อให้ภาพสวยงาม */
-            background-color: #fff; /* ตั้งพื้นหลังให้เป็นสีขาว */
+            padding: 20px;
         }
         .team-name-input {
             font-weight: bold;
@@ -100,6 +100,8 @@
         .buttons {
             text-align: center;
             margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
         }
         button {
             background-color: #4CAF50;
@@ -112,9 +114,26 @@
             margin: 5px 10px;
         }
         button.clear { background-color: #f44336; }
-        button.save { background-color: #008CBA; } /* สีปุ่มบันทึก */
+        button.save { background-color: #008CBA; }
+
+        .referees {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px 0;
+            border-top: 2px solid #eee;
+        }
+        .referees div {
+            text-align: center;
+        }
+        .referees input {
+             border: none;
+             border-bottom: 1px solid #ccc;
+             border-radius: 0;
+             text-align: center;
+        }
         
-        /* ส่วนตารางการแข่งขัน */
         .schedule {
             margin-top: 40px;
             border-top: 2px solid #333;
@@ -144,44 +163,39 @@
 <body>
 
 <div class="container">
-    <h1>ใบลงคะแนนเปตอง</h1>
-
-    <div class="match-info">
-        <div><label for="type">ประเภท</label><input type="text" id="type" placeholder="เช่น ชายคู่"></div>
-        <div><label for="round">รอบ</label><input type="text" id="round" placeholder="เช่น 1"></div>
-        <div><label for="pool">สาย</label><input type="text" id="pool" placeholder="เช่น A"></div>
-        <div><label for="match-no">คู่ที่</label><input type="text" id="match-no" placeholder="เช่น 1"></div>
-    </div>
-
-    <table class="score-table">
-        <thead>
-            <tr>
-                <th>ทีม</th>
-                <script>for(let i=1; i<=13; i++) document.write(`<th>${i}</th>`);</script>
-                <th>รวม</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" id="teamAName" class="team-name-input" value="ทีม A"></td>
-                <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreA" min="0"></td>`);</script>
-                <td id="totalA">0</td>
-            </tr>
-            <tr>
-                <td><input type="text" id="teamBName" class="team-name-input" value="ทีม B"></td>
-                <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreB" min="0"></td>`);</script>
-                <td id="totalB">0</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="buttons">
-        <button onclick="calculateScores()">คำนวณผล</button>
-        <button class="clear" onclick="resetForm()">ล้างข้อมูล</button>
-        <button class="save" onclick="saveAsJpg()">บันทึกเป็น JPG</button>
-    </div>
-
+    
     <div id="captureArea">
+        <h1>ใบลงคะแนนเปตอง</h1>
+
+        <div class="match-info">
+            <div><label for="type">ประเภท</label><input type="text" id="type" placeholder="เช่น หญิงคู่"></div>
+            <div><label for="round">รอบ</label><input type="text" id="round" placeholder="เช่น 1"></div>
+            <div><label for="pool">สาย</label><input type="text" id="pool" placeholder="เช่น A"></div>
+            <div><label for="match-no">คู่ที่</label><input type="text" id="match-no" placeholder="เช่น 1"></div>
+        </div>
+
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th>ทีม</th>
+                    <script>for(let i=1; i<=13; i++) document.write(`<th>${i}</th>`);</script>
+                    <th>รวม</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" id="teamAName" class="team-name-input" placeholder="ชื่อทีม A"></td>
+                    <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreA" min="0"></td>`);</script>
+                    <td id="totalA">0</td>
+                </tr>
+                <tr>
+                    <td><input type="text" id="teamBName" class="team-name-input" placeholder="ชื่อทีม B"></td>
+                    <script>for(let i=1; i<=13; i++) document.write(`<td><input type="number" class="scoreB" min="0"></td>`);</script>
+                    <td id="totalB">0</td>
+                </tr>
+            </tbody>
+        </table>
+
         <div class="results">
             <h2>ผลการแข่งขัน</h2>
             <div class="result-summary">
@@ -192,6 +206,25 @@
                 <span id="scoreResult">0 ต่อ 0</span>
             </div>
         </div>
+
+        <div class="referees">
+             <div>
+                <input type="text" id="ref1" placeholder="........................................................">
+                <label for="ref1">กรรมการ</label>
+             </div>
+             <div>
+                <input type="text" id="ref2" placeholder="........................................................">
+                <label for="ref2">กรรมการ</label>
+             </div>
+             <div>
+                <input type="text" id="ref3" placeholder="........................................................">
+                <label for="ref3">กรรมการ</label>
+             </div>
+        </div>
+    </div> <div class="buttons">
+        <button onclick="calculateScores()">คำนวณผล</button>
+        <button class="clear" onclick="resetForm()">ล้างข้อมูล</button>
+        <button class="save" onclick="saveAsJpg()">บันทึกเป็น JPG</button>
     </div>
 
     <div class="schedule">
@@ -227,7 +260,6 @@
 </div>
 
 <script>
-    // ฟังก์ชันคำนวณและรีเซ็ตเหมือนเดิม
     function calculateScores() {
         let scoresA = document.querySelectorAll('.scoreA');
         let totalA = 0;
@@ -264,28 +296,38 @@
     }
     
     function resetForm() {
-        document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
-        document.getElementById('teamAName').value = 'ทีม A';
-        document.getElementById('teamBName').value = 'ทีม B';
+        // ล้างข้อมูลใน captureArea
+        document.querySelectorAll('#captureArea input[type="text"], #captureArea input[type="number"]').forEach(input => input.value = '');
         document.querySelectorAll('.scoreA, .scoreB').forEach(score => score.value = '');
         document.getElementById('totalA').innerText = '0';
         document.getElementById('totalB').innerText = '0';
         document.getElementById('winnerTeam').innerText = 'ทีม...';
         document.getElementById('loserTeam').innerText = 'ทีม...';
         document.getElementById('scoreResult').innerText = '0 ต่อ 0';
+        
+        // ล้างข้อมูลตารางการแข่งขัน
+         document.querySelectorAll('.schedule-table input[type="text"]').forEach(input => input.value = '');
     }
 
-    // ฟังก์ชันใหม่สำหรับบันทึกเป็น JPG
+    // ปรับปรุงฟังก์ชันบันทึก
     function saveAsJpg() {
         const captureElement = document.getElementById('captureArea');
-        const teamAName = document.getElementById('teamAName').value || 'TeamA';
-        const teamBName = document.getElementById('teamBName').value || 'TeamB';
-        const fileName = `ผลการแข่งขัน-${teamAName}-vs-${teamBName}.jpg`;
+        const competitionType = document.getElementById('type').value.replace(/\s/g, '') || 'ทั่วไป';
+        const matchNo = document.getElementById('match-no').value || '0';
+        const fileName = `ผลเปตอง-${competitionType}-คู่ที่-${matchNo}.jpg`;
+
+        // ซ่อน border ของ input ชั่วคราวก่อนถ่ายภาพ
+        let inputs = captureElement.querySelectorAll('input');
+        inputs.forEach(input => input.style.border = 'none');
+
 
         html2canvas(captureElement, {
-            scale: 2 // เพิ่มความละเอียดของภาพเป็น 2 เท่า
+            scale: 2 
         }).then(canvas => {
-            const image = canvas.toDataURL("image/jpeg", 0.9); // แปลงเป็น JPG ที่คุณภาพ 90%
+            // คืนค่า border ของ input หลังจากถ่ายภาพเสร็จ
+            inputs.forEach(input => input.style.border = '');
+
+            const image = canvas.toDataURL("image/jpeg", 0.9);
             const link = document.createElement('a');
             link.href = image;
             link.download = fileName;
